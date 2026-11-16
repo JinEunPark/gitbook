@@ -14,7 +14,25 @@ description: 서버에 올린 지 두 달 반 동안, 운영 서버 안에서 �
 
 원인은 설정 한 줄이 없었던 것이다. 앱 어디에도 로깅 초기화가 없어서, 모든 로그가 Python 기본값인 root 로거(레벨 WARNING, 핸들러 0개)로 갔다. gunicorn 은 자기 로거만 설정하므로 앱 로그는 대상이 아니다.
 
-![11.05 이전 로그 경로](../.gitbook/assets/intro-10-lost-logs.svg)
+```mermaid
+flowchart LR
+  classDef internal fill:#FFFFFF,stroke:#475569,color:#0F172A
+  classDef bad fill:#FEE2E2,stroke:#DC2626,stroke-width:2px,color:#7F1D1D
+
+  I["logger.info<br/>토스 웹훅 수신 · 방치 주문 N건 정리"]:::internal
+  W["logger.warning 이상"]:::internal
+  ROOT["root 로거<br/>레벨 WARNING · 핸들러 0개"]:::bad
+  DROP["버려짐"]:::bad
+  LR2["Python 기본 비상 출력<br/>stderr 에 형식 없이"]:::internal
+  GU["gunicorn 자체 로거"]:::internal
+  OUT["docker 로그"]:::internal
+
+  I --> ROOT
+  W --> ROOT
+  ROOT -->|"INFO"| DROP
+  ROOT -->|"WARNING 이상"| LR2 --> OUT
+  GU --> OUT
+```
 
 _root 로거가 WARNING 미만을 버리고, 핸들러가 없으니 WARNING 이상도 형식 없이 stderr 로만 나갔다. 문제는 오류가 아니라 "아무 일도 안 일어난 것처럼 보이는" 상태였다는 점이다 — 결제 수동 테스트의 "로그에 ~가 찍히는지" 항목이 처음부터 확인할 수 없는 항목이었다._
 

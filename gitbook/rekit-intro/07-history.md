@@ -8,7 +8,24 @@ description: 08.23 첫 배포부터 11.10 까지, 네 번의 전환점마다 무
 **핵심 — 구조는 한 번에 설계되지 않았다. 네 번의 전환점마다 드러난 문제 하나가 다음 구조를 정했다.**
 {% endhint %}
 
-![전환점 타임라인](../.gitbook/assets/intro-17-timeline.svg)
+```mermaid
+timeline
+  title rekit 인프라 전환점 (2026)
+  05.01 : 개발 PC compose
+        : SeaweedFS 까지 직접 띄움
+  08.23 : 첫 운영 배포
+        : Jenkins · 내부 registry
+        : 화면과 API 같은 주소
+  08.30 : DB 는 서버 내부 전용
+        : SSH 터널로만 접속
+  11.05 : INFO 로그 유실 발견
+        : 구조화 로그 · request_id · 메트릭
+        : 롤백 때 compose 도 태그 시점
+  11.10 : 관측 스택 7개 · 알림 16
+        : 외부 공개 지점 nginx 하나로
+        : nginx ↔ 앱 request_id 연결
+  다음 : Loki · 슬랙 · 외부 감시 · 백업
+```
 
 _전환점을 날짜로 나눈 이유는 각 변화가 특정 사건에 대한 응답이었기 때문이다. 11.05 와 11.10 사이 닷새 동안 가장 많은 것이 바뀌었다._
 
@@ -18,13 +35,57 @@ _전환점을 날짜로 나눈 이유는 각 변화가 특정 사건에 대한 �
 {% column %}
 **08.23 첫 배포**
 
-![08.23 구성](../.gitbook/assets/intro-15-history-0823.svg)
+```mermaid
+flowchart LR
+  classDef ext fill:#F1F5F9,stroke:#64748B,stroke-dasharray:5 4,color:#0F172A
+  classDef public fill:#FED7AA,stroke:#EA580C,stroke-width:3px,color:#7C2D12
+  classDef internal fill:#FFFFFF,stroke:#475569,color:#0F172A
+  classDef bad fill:#FEE2E2,stroke:#DC2626,stroke-width:2px,color:#7F1D1D
+
+  I["인터넷"]:::ext
+  N["nginx (원래 있던 것)"]:::public
+  W["rekle-web"]:::internal
+  A["rekle-app"]:::internal
+  DR["postgres · redis"]:::internal
+  S["seaweedfs (원래 있던 것)<br/>관리 포트도 외부에 publish"]:::bad
+  J["jenkins<br/>직접 포트 publish"]:::bad
+  Q["서버 안을 볼 장치 없음<br/>INFO 로그 유실 · 메트릭 없음"]:::bad
+
+  I --> N
+  N --> W
+  N --> A --> DR
+  N --> S
+  I --> S
+  I --> J
+```
 {% endcolumn %}
 
 {% column %}
 **11.10 이후**
 
-![11.10 구성](../.gitbook/assets/intro-16-history-1110.svg)
+```mermaid
+flowchart LR
+  classDef ext fill:#F1F5F9,stroke:#64748B,stroke-dasharray:5 4,color:#0F172A
+  classDef public fill:#FED7AA,stroke:#EA580C,stroke-width:3px,color:#7C2D12
+  classDef internal fill:#FFFFFF,stroke:#475569,color:#0F172A
+
+  I["인터넷"]:::ext
+  N["nginx<br/>유일한 외부 공개 · request_id 발급"]:::public
+  W["rekle-web"]:::internal
+  A["rekle-app<br/>JSON 로그 · 메트릭"]:::internal
+  DR["postgres · redis"]:::internal
+  S["seaweedfs<br/>서버 내부 전용"]:::internal
+  J["jenkins<br/>HTTPS 서브경로"]:::internal
+  M["관측 스택 7개<br/>Prometheus · Grafana 외"]:::internal
+
+  I --> N
+  N --> W
+  N --> A --> DR
+  N --> S
+  N ==> J
+  N ==> M
+  M -.-> A
+```
 {% endcolumn %}
 {% endcolumns %}
 

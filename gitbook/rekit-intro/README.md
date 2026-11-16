@@ -8,7 +8,34 @@ description: 혼자 운영하는 쇼핑몰이 서버 1대 위에서 돈과 재�
 **rekit 은 혼자 운영하는 쇼핑몰이 서버 1대 위에서 돈과 재고를 틀리지 않고, 문제가 생기면 보이도록 만든 구조다.**
 {% endhint %}
 
-![전체 구성](../.gitbook/assets/intro-01-overview.svg)
+```mermaid
+flowchart TB
+  classDef ext fill:#F1F5F9,stroke:#64748B,stroke-dasharray:5 4,color:#0F172A
+  classDef public fill:#FED7AA,stroke:#EA580C,stroke-width:3px,color:#7C2D12
+  classDef internal fill:#FFFFFF,stroke:#475569,color:#0F172A
+  classDef planned fill:#FFFFFF,stroke:#94A3B8,stroke-dasharray:3 3,color:#64748B
+
+  U["구매자 · 관리자 브라우저"]:::ext
+  OP["운영자 (1명)"]:::ext
+  R["공유기<br/>HTTP·HTTPS 만 서버로 전달"]:::ext
+
+  subgraph SRV["리눅스 서버 1대 · 4코어 · 메모리 15GiB"]
+    N["nginx<br/>유일한 외부 공개 지점"]:::public
+    A["컨테이너 16개 안팎<br/>쇼핑몰 · DB · 사진 · 배포 · 관측"]:::internal
+  end
+
+  T["토스페이먼츠<br/>결제 승인 · 취소 · 웹훅"]:::ext
+  X["외부 API<br/>소셜 로그인 3사 · Octomo · Gmail"]:::ext
+  SL["슬랙<br/>알림 수신 (미연결)"]:::planned
+
+  U --> R
+  OP ==>|"HTTPS · SSH"| R
+  R --> N --> A
+  A --> T
+  T -->|"결제 상태 웹훅"| R
+  A --> X
+  A --> SL
+```
 
 _들어오는 길은 공유기와 nginx 하나로 모으고, 나머지는 서버 안에서만 서로 닿는다._
 

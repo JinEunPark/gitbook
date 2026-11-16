@@ -8,7 +8,34 @@ description: 구매자·토스·운영자 모두 같은 공유기와 같은 ngin
 **핵심 — 구매자, 토스 웹훅, 운영자 모두 같은 공유기와 같은 nginx 를 지나 서버 1대로 들어온다.**
 {% endhint %}
 
-![전체 구성](../../.gitbook/assets/intro-01-overview.svg)
+```mermaid
+flowchart TB
+  classDef ext fill:#F1F5F9,stroke:#64748B,stroke-dasharray:5 4,color:#0F172A
+  classDef public fill:#FED7AA,stroke:#EA580C,stroke-width:3px,color:#7C2D12
+  classDef internal fill:#FFFFFF,stroke:#475569,color:#0F172A
+  classDef planned fill:#FFFFFF,stroke:#94A3B8,stroke-dasharray:3 3,color:#64748B
+
+  U["구매자 · 관리자 브라우저"]:::ext
+  OP["운영자 (1명)"]:::ext
+  R["공유기<br/>HTTP·HTTPS 만 서버로 전달"]:::ext
+
+  subgraph SRV["리눅스 서버 1대 · 4코어 · 메모리 15GiB"]
+    N["nginx<br/>유일한 외부 공개 지점"]:::public
+    A["컨테이너 16개 안팎<br/>쇼핑몰 · DB · 사진 · 배포 · 관측"]:::internal
+  end
+
+  T["토스페이먼츠<br/>결제 승인 · 취소 · 웹훅"]:::ext
+  X["외부 API<br/>소셜 로그인 3사 · Octomo · Gmail"]:::ext
+  SL["슬랙<br/>알림 수신 (미연결)"]:::planned
+
+  U --> R
+  OP ==>|"HTTPS · SSH"| R
+  R --> N --> A
+  A --> T
+  T -->|"결제 상태 웹훅"| R
+  A --> X
+  A --> SL
+```
 
 _들어오는 길을 하나로 모은 이유는 지킬 곳을 하나로 줄이기 위해서다. 나가는 연결(토스 · 소셜 로그인 · 문자 · 메일)은 앱이 시작하고, 들어오는 연결은 모두 nginx 가 받는다. 슬랙은 알림 설정만 끝났고 수신 주소가 아직 연결되지 않았다._
 

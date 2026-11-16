@@ -10,7 +10,36 @@ description: 숫자는 Prometheus 로 모이고, 로그는 아직 컨테이너 �
 
 ## 메트릭 — 수집 → 규칙 → 알림 → 대시보드
 
-![메트릭 흐름](../../.gitbook/assets/intro-04-metrics.svg)
+```mermaid
+flowchart LR
+  classDef internal fill:#FFFFFF,stroke:#475569,color:#0F172A
+  classDef planned fill:#FFFFFF,stroke:#94A3B8,stroke-dasharray:3 3,color:#64748B
+
+  subgraph BACK["rekit-backend_default"]
+    APP["rekle-app 메트릭<br/>워커 4개 값을 합산"]:::internal
+  end
+  subgraph SW["seaweedfs_default"]
+    S["seaweedfs 메트릭"]:::internal
+  end
+  subgraph MON["rekle-monitoring_default"]
+    EX["exporter 4종<br/>호스트 · 컨테이너 · DB · Redis"]:::internal
+    P["Prometheus<br/>15초 간격 · 30일 보관"]:::internal
+    RU["규칙<br/>알림 16 · 기록 8"]:::internal
+    AM["Alertmanager<br/>묶기 · 중복 억제"]:::internal
+    G["Grafana<br/>대시보드 3"]:::internal
+  end
+  SL["슬랙 (미연결)"]:::planned
+
+  P -.-> APP
+  P -.-> S
+  P -.-> EX
+  P --> RU --> AM --> SL
+  G -->|"조회만"| P
+
+  style BACK fill:#DCFCE7,stroke:#22C55E
+  style SW fill:#FEF3C7,stroke:#F59E0B
+  style MON fill:#EDE9FE,stroke:#8B5CF6
+```
 
 _관측 스택을 앱과 다른 compose 프로젝트로 두고 앱 망에 "합류"하게 한 이유는, 앱을 배포할 때마다 관측 컨테이너가 다시 만들어지지 않게 하기 위해서다. Grafana 는 Prometheus 만 조회하므로 DB 비밀번호를 갖지 않는다._
 
@@ -43,7 +72,20 @@ _규칙은 `promtool test rules` 단위 테스트로 검증한다 (커밋 `422bb
 
 ## 로그 — 지금과 계획
 
-![로그 흐름](../../.gitbook/assets/intro-05-logs.svg)
+```mermaid
+flowchart LR
+  classDef internal fill:#FFFFFF,stroke:#475569,color:#0F172A
+  classDef planned fill:#FFFFFF,stroke:#94A3B8,stroke-dasharray:3 3,color:#64748B
+  classDef bad fill:#FEE2E2,stroke:#DC2626,stroke-width:2px,color:#7F1D1D
+
+  subgraph NOW["지금"]
+    A1["rekle-app<br/>JSON 로그 한 줄 → stdout"]:::internal --> J1["docker json-file<br/>20MB × 5개"]:::internal --> X1["컨테이너를 다시 만들면<br/>로그 파일도 삭제"]:::bad
+  end
+  subgraph PLAN["계획 · Loki + Alloy"]
+    J2["docker json-file"]:::internal --> AL["Alloy<br/>수집"]:::planned --> LK["Loki<br/>30일 보관"]:::planned --> GR["Grafana<br/>request_id 로 검색"]:::planned
+  end
+  NOW ~~~ PLAN
+```
 
 _지금 로그는 컨테이너 디렉터리 안 파일에만 있어서, 배포로 컨테이너를 다시 만들면 함께 지워진다. 0.0.6 배포 직후 rekle-app 로그는 101줄만 남아 있었다. 계획은 로그를 컨테이너 밖 Loki 에 30일 보관하고, Grafana 에서 `request_id` 로 찾는 것이다._
 
@@ -58,7 +100,29 @@ _지금 로그는 컨테이너 디렉터리 안 파일에만 있어서, 배포�
 
 ## 운영자 접근 경로
 
-![운영자 접근](../../.gitbook/assets/intro-06-operator.svg)
+```mermaid
+flowchart LR
+  classDef ext fill:#F1F5F9,stroke:#64748B,stroke-dasharray:5 4,color:#0F172A
+  classDef public fill:#FED7AA,stroke:#EA580C,stroke-width:3px,color:#7C2D12
+  classDef internal fill:#FFFFFF,stroke:#475569,color:#0F172A
+
+  OP["운영자 노트북"]:::ext
+  N["nginx<br/>HTTPS 서브경로"]:::public
+  T["SSH 터널<br/>서버 내부 전용 포트로"]:::internal
+  G["Grafana<br/>로그인 필수 · 익명 차단"]:::internal
+  J["Jenkins<br/>로그인 필수"]:::internal
+  P["rekle-postgres"]:::internal
+  PR["Prometheus · Alertmanager"]:::internal
+  S["SeaweedFS 관리 화면"]:::internal
+
+  OP ==> N
+  N ==> G
+  N ==> J
+  OP ==> T
+  T ==> P
+  T ==> PR
+  T ==> S
+```
 
 _로그인 화면이 있는 도구(Grafana · Jenkins)만 HTTPS 경로로 열고, 로그인 기능이 없는 화면(Prometheus · SeaweedFS 관리 화면)과 DB 는 SSH 터널로만 연다. 인증이 없는 화면을 인터넷에 두지 않는다는 기준이다._
 

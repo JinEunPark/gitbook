@@ -8,7 +8,24 @@ description: nginx 가 발급한 request_id 하나로 nginx 액세스 로그와 
 **핵심 — ID 는 nginx 가 발급하고 바깥에서 온 값은 버린다. 그 ID 하나로 nginx 로그와 앱 로그의 같은 요청을 찾는다.**
 {% endhint %}
 
-![요청 하나의 흐름과 request_id](../../.gitbook/assets/intro-03-request-id.svg)
+```mermaid
+sequenceDiagram
+  participant B as 브라우저
+  participant N as nginx
+  participant A as rekle-app
+  participant D as rekle-postgres
+
+  B->>N: GET /api/v1/products<br/>(X-Request-ID 를 보내도 무시)
+  Note over N: $request_id 새로 발급
+  N->>A: X-Request-ID: 82d525e4…
+  Note over A: RequestContextMiddleware 가<br/>contextvars 에 request_id 바인딩<br/>인증 뒤 user_id 추가
+  A->>D: SQL
+  D-->>A: 결과
+  Note over A: JSON 로그 한 줄마다 request_id 자동 포함<br/>duration_ms 11.49
+  A-->>N: 200 + X-Request-ID
+  Note over N: 액세스 로그 rid=82d525e4…<br/>rt 0.014 · urt 0.013
+  N-->>B: 200 + X-Request-ID
+```
 
 _ID 를 nginx 에서 만드는 이유는 nginx 가 요청을 가장 먼저 받는 곳이라서다. 앱에서 만들면 nginx 로그에는 ID 가 없고, 클라이언트가 보낸 값을 그대로 쓰면 다른 요청의 ID 를 흉내 내 로그를 섞을 수 있다. 그림의 숫자는 11.10 운영 검증 때 실제로 찍힌 값이다._
 

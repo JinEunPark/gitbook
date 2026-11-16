@@ -8,7 +8,16 @@ description: 바깥에 여는 곳은 하나, 돈과 재고는 DB 가 판정, 되
 **핵심 — 네 가지 원칙은 미리 정한 것이 아니라, 사고와 발견을 겪으며 하나씩 굳어진 것이다.**
 {% endhint %}
 
-![원칙과 적용](../.gitbook/assets/intro-19-principles.svg)
+```mermaid
+flowchart LR
+  classDef internal fill:#FFFFFF,stroke:#475569,color:#0F172A
+  classDef public fill:#FED7AA,stroke:#EA580C,stroke-width:3px,color:#7C2D12
+
+  P1["① 바깥에 여는 곳은 하나"]:::public --> E1["nginx 외 전부 서버 내부 전용<br/>관리 화면은 SSH 터널"]:::internal
+  P2["② 돈과 재고는 DB 가 판정"]:::internal --> E2["행 잠금 · SKIP LOCKED<br/>웹훅은 재조회로 확인"]:::internal
+  P3["③ 되돌릴 수 있게 배포"]:::internal --> E3["태그 단위 이미지 + compose<br/>운영 변경 전 백업"]:::internal
+  P4["④ 보이지 않으면 고칠 수 없다"]:::internal --> E4["request_id · 메트릭 · SLO 알림"]:::internal
+```
 
 _원칙마다 오른쪽에 실제로 바뀐 것을 붙였다. 원칙만 있고 적용 사례가 없는 항목은 이 목록에 넣지 않았다._
 

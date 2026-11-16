@@ -10,7 +10,24 @@ description: 하나의 앱 안에서 도메인 모듈을 나누고, 외부 서�
 
 ## 층 구조
 
-![앱 내부 층](../../.gitbook/assets/intro-07-app-layers.svg)
+```mermaid
+flowchart TB
+  classDef ext fill:#F1F5F9,stroke:#64748B,stroke-dasharray:5 4,color:#0F172A
+  classDef internal fill:#FFFFFF,stroke:#475569,color:#0F172A
+
+  R["router<br/>입력 검증 · 응답 모양"]:::internal
+  S["service<br/>도메인 규칙 · 트랜잭션 경계"]:::internal
+  RP["repository<br/>쿼리 · 행 잠금"]:::internal
+  DB["rekle-postgres"]:::internal
+  PT["port (Protocol)<br/>PaymentGateway · OAuth · OTP · Storage · Email"]:::internal
+  AD["adapter<br/>toss · kakao · naver · google · octomo · s3 · gmail<br/>테스트에서는 fake 로 교체"]:::internal
+  EX["외부 서비스"]:::ext
+
+  R --> S --> RP --> DB
+  S --> PT
+  PT -->|"구현"| AD
+  AD --> EX
+```
 
 _외부 서비스만 port 뒤로 숨긴 이유는 테스트 때문이다. 토스 · 소셜 로그인 · 문자 · 메일을 실제로 부르지 않고도 결제 서비스 로직을 검증하려면, 서비스가 SDK 가 아니라 Protocol 에만 의존해야 한다. DB 접근은 같은 이유로 숨기지 않았다 — 쿼리 정확성과 잠금은 실제 PostgreSQL 통합 테스트로 확인한다._
 
@@ -39,7 +56,30 @@ _근거: 저장소 `CLAUDE.md` "모듈 의존성 규칙", 05.05 일지 "외부 �
 
 ## 결제 한 건의 흐름
 
-![결제 흐름](../../.gitbook/assets/intro-08-payment.svg)
+```mermaid
+sequenceDiagram
+  participant B as 브라우저
+  participant A as rekle-app
+  participant D as rekle-postgres
+  participant T as 토스페이먼츠
+
+  B->>A: 주문 생성
+  A->>D: 상품 행을 id 순서로 잠금 → 재고 차감<br/>주문 PENDING (결제 기한 30분)
+  B->>T: 결제위젯에서 결제
+  T-->>B: 성공 화면으로 이동 (paymentKey · 금액)
+  B->>A: 결제 승인 요청
+  A->>T: 승인 (Idempotency-Key)
+  alt 승인 성공
+    T-->>A: DONE
+    A->>D: 주문 PAID
+  else 시간 초과 · 연결 끊김
+    A-->>B: "결과 확인 중" — 재결제를 권하지 않음
+  end
+  T->>A: 웹훅 (본문은 믿지 않음)
+  A->>T: 결제 조회 API 로 다시 확인
+  A->>D: 조회 결과 상태로만 전이 · 금액 대조
+  Note over A,D: 방치 주문 정리 — 기한 지난 PENDING 을 SKIP LOCKED 로 한 건씩,<br/>토스 실제 상태를 확인한 뒤에만 취소하고 재고를 돌려놓는다
+```
 
 _결제는 세 곳(브라우저 · 토스 · 웹훅)에서 신호가 오므로, 어느 신호도 혼자서 주문 상태를 정하지 못하게 했다. 승인은 Idempotency-Key 로 한 번만 가게 하고, 웹훅은 결제 조회로 다시 확인하고, 아무 신호도 오지 않은 주문은 30분 뒤 스위퍼가 토스 실제 상태를 보고 정리한다._
 
@@ -56,7 +96,25 @@ _결제는 세 곳(브라우저 · 토스 · 웹훅)에서 신호가 오므로, 
 
 ## 배포
 
-![배포 경로](../../.gitbook/assets/intro-09-deploy.svg)
+```mermaid
+flowchart TB
+  classDef ext fill:#F1F5F9,stroke:#64748B,stroke-dasharray:5 4,color:#0F172A
+  classDef internal fill:#FFFFFF,stroke:#475569,color:#0F172A
+
+  TAG["GitHub<br/>git 태그 X.Y.Z"]:::ext
+  BW["Jenkins build-was<br/>이미지 빌드"]:::internal
+  REG["내부 registry<br/>서버 안 이미지 보관"]:::internal
+  DW["Jenkins deploy-was<br/>운영자가 태그 선택"]:::internal
+  CP["그 태그 시점의<br/>compose 파일 꺼내기"]:::internal
+  UP["DB · Redis · 앱<br/>up -d"]:::internal
+  HC["앱 /health 확인<br/>2초 간격 최대 30회"]:::internal
+  RB["이전 태그로<br/>deploy-was 다시 실행"]:::internal
+
+  TAG --> BW --> REG --> DW
+  TAG --> CP
+  CP --> DW --> UP --> HC
+  HC -->|"실패"| RB
+```
 
 _빌드와 배포를 두 잡으로 나눈 이유는 배포 버튼을 운영자가 직접 누르게 하기 위해서다. 배포 잡은 태그 하나를 입력받고, 그 태그 시점의 compose 파일을 같이 꺼내 이미지와 실행 명령이 늘 같은 시점이 되게 한다. 롤백도 같은 잡에서 이전 태그를 고르는 것으로 끝난다._
 

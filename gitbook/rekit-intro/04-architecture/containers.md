@@ -8,7 +8,39 @@ description: DB 와 Redis 는 rekit-backend_default 에만 있어서, nginx 를 
 **핵심 — 컨테이너가 서로 닿는 범위는 Docker 망이 정하고, 바깥에 열리는 범위는 포트 바인딩이 정한다. 두 가지를 따로 관리한다.**
 {% endhint %}
 
-![컨테이너와 네트워크](../../.gitbook/assets/intro-02-containers.svg)
+```mermaid
+flowchart LR
+  classDef public fill:#FED7AA,stroke:#EA580C,stroke-width:3px,color:#7C2D12
+  classDef internal fill:#FFFFFF,stroke:#475569,color:#0F172A
+
+  subgraph EDGE["rekit_edge"]
+    N["nginx<br/>외부 공개 · HTTPS"]:::public
+    W["rekle-web<br/>Vue 빌드 결과"]:::internal
+    J["jenkins<br/>빌드 · 배포"]:::internal
+    G["rekle-mon-grafana<br/>대시보드"]:::internal
+  end
+  subgraph BACK["rekit-backend_default"]
+    A["rekle-app<br/>API · 워커 4개<br/>+ rekit_edge · seaweedfs_default"]:::internal
+    P["rekle-postgres"]:::internal
+    RD["rekle-redis"]:::internal
+  end
+  subgraph SW["seaweedfs_default"]
+    S["seaweedfs<br/>상품 사진 (S3 호환)"]:::internal
+  end
+
+  N -->|"화면"| W
+  N -->|"API"| A
+  N -->|"사진"| S
+  A --> P
+  A --> RD
+  A -->|"사진 저장소 호출은<br/>공개 주소로 nginx 경유"| N
+  N ==>|"운영 도구"| G
+  N ==>|"운영 도구"| J
+
+  style EDGE fill:#DBEAFE,stroke:#3B82F6
+  style BACK fill:#DCFCE7,stroke:#22C55E
+  style SW fill:#FEF3C7,stroke:#F59E0B
+```
 
 _DB 와 Redis 는 `rekit-backend_default` 에만 두어, 바깥은 물론 nginx 도 직접 닿지 못하게 했다. `rekle-app` 은 세 망에 걸쳐 있어 nginx 와 DB 사이의 유일한 통로가 된다. 관측 컨테이너 7개는 [모니터링](monitoring.md) 그림에 따로 그렸다._
 

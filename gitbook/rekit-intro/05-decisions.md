@@ -19,7 +19,31 @@ description: 외부 공개 지점 하나, 같은 출처, 관측 스택 분리, �
 
 ## 1. 외부 공개 지점은 nginx 하나
 
-![포트 정리 전후](../.gitbook/assets/intro-11-ports.svg)
+```mermaid
+flowchart LR
+  classDef ext fill:#F1F5F9,stroke:#64748B,stroke-dasharray:5 4,color:#0F172A
+  classDef public fill:#FED7AA,stroke:#EA580C,stroke-width:3px,color:#7C2D12
+  classDef internal fill:#FFFFFF,stroke:#475569,color:#0F172A
+  classDef bad fill:#FEE2E2,stroke:#DC2626,stroke-width:2px,color:#7F1D1D
+
+  subgraph BEFORE["변경 전 (11.10 오전)"]
+    I1["인터넷"]:::ext
+    N1["nginx · HTTPS"]:::public
+    J1["Jenkins 직접 포트<br/>모든 주소에 publish"]:::bad
+    S1["SeaweedFS 관리 포트 4개<br/>외부에서 파일 API 응답"]:::bad
+    I1 --> N1
+    I1 --> J1
+    I1 --> S1
+  end
+  subgraph AFTER["변경 후 (11.10 밤)"]
+    I2["인터넷"]:::ext
+    N2["nginx · HTTPS"]:::public
+    J2["Jenkins<br/>서버 내부 전용 + HTTPS 서브경로"]:::internal
+    S2["SeaweedFS 관리 화면<br/>서버 내부 전용 + SSH 터널"]:::internal
+    I2 --> N2 --> J2
+  end
+  BEFORE ~~~ AFTER
+```
 
 _방화벽 대신 compose 바인딩으로 막은 이유: Docker 의 포트 publish 는 iptables 에 직접 규칙을 넣어 ufw 를 우회한다. 막는 위치를 "포트를 여는 그 파일"로 옮겨야 다시 열리지 않는다._
 
@@ -44,7 +68,30 @@ ports:
 
 ## 2. 화면과 API 를 같은 주소 아래에
 
-![같은 출처 전후](../.gitbook/assets/intro-12-same-origin.svg)
+```mermaid
+flowchart LR
+  classDef ext fill:#F1F5F9,stroke:#64748B,stroke-dasharray:5 4,color:#0F172A
+  classDef public fill:#FED7AA,stroke:#EA580C,stroke-width:3px,color:#7C2D12
+  classDef internal fill:#FFFFFF,stroke:#475569,color:#0F172A
+  classDef bad fill:#FEE2E2,stroke:#DC2626,stroke-width:2px,color:#7F1D1D
+
+  subgraph BEFORE["개발 단계 (05.10 ~ 08.22)"]
+    B1["브라우저<br/>화면 출처 A"]:::ext
+    C1["CORS 검사<br/>서버 500 이 'CORS 에러'로 보임"]:::bad
+    A1["API 출처 B"]:::internal
+    B1 --> C1 --> A1
+  end
+  subgraph AFTER["운영 (08.23 ~)"]
+    B2["브라우저"]:::ext
+    N2["nginx · rekit.co.kr 하나"]:::public
+    W2["화면 /"]:::internal
+    A2["API /api/v1 (상대주소)"]:::internal
+    B2 --> N2
+    N2 --> W2
+    N2 --> A2
+  end
+  BEFORE ~~~ AFTER
+```
 
 _주소를 하나로 모은 이유: 출처가 다르면 브라우저가 CORS 검사를 하고, 서버가 500 을 내면서 CORS 헤더를 빠뜨리면 브라우저에는 "CORS 에러"만 보인다. 05.10 에 실제로 이 때문에 서버 내부 오류를 CORS 문제로 오인했다._
 
@@ -66,7 +113,26 @@ ENV VITE_API_BASE_URL=/api/v1
 
 ## 3. 관측 스택을 별도 compose 프로젝트로
 
-![관측 스택 분리](../.gitbook/assets/intro-13-monitoring-project.svg)
+```mermaid
+flowchart LR
+  classDef internal fill:#FFFFFF,stroke:#475569,color:#0F172A
+
+  JD["Jenkins deploy-was<br/>태그마다 실행"]:::internal
+  MD["운영자 수동 배포<br/>설정이 바뀔 때만"]:::internal
+
+  subgraph APPP["compose 프로젝트 rekit-backend"]
+    A["rekle-app · postgres · redis"]:::internal
+  end
+  subgraph MONP["compose 프로젝트 rekle-monitoring"]
+    M["관측 컨테이너 7개"]:::internal
+  end
+  NET["외부 망 이름은 env 로 받음<br/>REKLE_APP_NETWORK · EDGE_NETWORK · SEAWEEDFS_NETWORK"]:::internal
+
+  JD --> APPP
+  MD --> MONP
+  MONP --> NET
+  NET -.->|"앱 망에 합류해 수집"| APPP
+```
 
 _앱과 같은 compose 에 넣지 않은 이유: Jenkins 배포 잡은 태그마다 앱 프로젝트를 `up -d` 한다. 감시 도구가 같은 프로젝트에 있으면 배포 설정이 바뀔 때 감시도 같이 재생성되고, 앱 롤백이 감시 설정까지 되돌린다._
 
@@ -96,7 +162,27 @@ networks:
 
 ## 4. 롤백 때 compose 도 태그 시점 것으로
 
-![롤백 전후](../.gitbook/assets/intro-14-rollback.svg)
+```mermaid
+flowchart LR
+  classDef internal fill:#FFFFFF,stroke:#475569,color:#0F172A
+  classDef bad fill:#FEE2E2,stroke:#DC2626,stroke-width:2px,color:#7F1D1D
+
+  subgraph BEFORE["변경 전"]
+    I1["이미지 0.0.4<br/>gunicorn.conf.py 없음"]:::internal
+    C1["compose = master<br/>gunicorn -c gunicorn.conf.py"]:::internal
+    F1["기동 실패"]:::bad
+    I1 --> F1
+    C1 --> F1
+  end
+  subgraph AFTER["변경 후 (11.05)"]
+    I2["이미지 0.0.4"]:::internal
+    C2["compose = 태그 0.0.4 시점<br/>git show tags/0.0.4"]:::internal
+    OK2["이미지와 실행 명령이 같은 시점"]:::internal
+    I2 --> OK2
+    C2 --> OK2
+  end
+  BEFORE ~~~ AFTER
+```
 
 _이미지와 compose 를 같은 시점으로 묶은 이유: compose 의 실행 명령이 바뀌면, 새 compose 로 옛 이미지를 띄울 때 이미지 안에 없는 파일을 찾는다. 되돌리기 수단이 오히려 기동 실패를 만든다._
 

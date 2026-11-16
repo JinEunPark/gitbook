@@ -28,7 +28,26 @@ description: 사건을 계기로 구조를 바꾼 것은 잘됐고, 서버 1대�
 
 ## 남은 과제
 
-![서버 1대의 장애 범위](../.gitbook/assets/intro-18-failure-domain.svg)
+```mermaid
+flowchart LR
+  classDef ext fill:#F1F5F9,stroke:#64748B,stroke-dasharray:5 4,color:#0F172A
+  classDef internal fill:#FFFFFF,stroke:#475569,color:#0F172A
+  classDef planned fill:#FFFFFF,stroke:#94A3B8,stroke-dasharray:3 3,color:#64748B
+  classDef bad fill:#FEE2E2,stroke:#DC2626,stroke-width:2px,color:#7F1D1D
+
+  subgraph SRV["서버 1대 — 함께 멈추는 범위"]
+    SHOP["쇼핑몰 · API"]:::bad
+    DATA["DB · 상품 사진"]:::bad
+    MON["Prometheus · Alertmanager"]:::bad
+  end
+  UP["외부 업타임 감시<br/>서버 밖에서 1분마다 확인"]:::planned
+  BK["서버 밖 백업<br/>DB 덤프 · 사진"]:::planned
+  OP["운영자"]:::ext
+
+  UP -->|"응답 없음 알림"| OP
+  DATA --> BK
+  MON -->|"서버가 멈추면 알림도 멈춤"| OP
+```
 
 _우선순위를 이 그림으로 정했다. 서버가 멈추면 감시 도구도 같이 멈추므로, 서버 안에 무엇을 더 붙여도 이 경우는 잡지 못한다. 그래서 서버 밖에 두는 두 가지(업타임 감시 · 백업)가 맨 앞이다._
 
