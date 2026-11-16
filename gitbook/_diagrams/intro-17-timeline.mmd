@@ -1,0 +1,17 @@
+%% 질문: 인프라가 바뀐 전환점은 언제였는가
+timeline
+  title rekit 인프라 전환점 (2026)
+  05.01 : 개발 PC compose
+        : SeaweedFS 까지 직접 띄움
+  08.23 : 첫 운영 배포
+        : Jenkins · 내부 registry
+        : 화면과 API 같은 주소
+  08.30 : DB 는 서버 내부 전용
+        : SSH 터널로만 접속
+  11.05 : INFO 로그 유실 발견
+        : 구조화 로그 · request_id · 메트릭
+        : 롤백 때 compose 도 태그 시점
+  11.10 : 관측 스택 7개 · 알림 16
+        : 외부 공개 지점 nginx 하나로
+        : nginx ↔ 앱 request_id 연결
+  다음 : Loki · 슬랙 · 외부 감시 · 백업

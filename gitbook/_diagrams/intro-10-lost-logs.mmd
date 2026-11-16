@@ -1,0 +1,18 @@
+%% 질문: 11/05 이전, 앱의 INFO 로그는 왜 운영에서 한 줄도 남지 않았는가
+flowchart LR
+  classDef internal fill:#FFFFFF,stroke:#475569,color:#0F172A
+  classDef bad fill:#FEE2E2,stroke:#DC2626,stroke-width:2px,color:#7F1D1D
+
+  I["logger.info<br/>토스 웹훅 수신 · 방치 주문 N건 정리"]:::internal
+  W["logger.warning 이상"]:::internal
+  ROOT["root 로거<br/>레벨 WARNING · 핸들러 0개"]:::bad
+  DROP["버려짐"]:::bad
+  LR2["Python 기본 비상 출력<br/>stderr 에 형식 없이"]:::internal
+  GU["gunicorn 자체 로거"]:::internal
+  OUT["docker 로그"]:::internal
+
+  I --> ROOT
+  W --> ROOT
+  ROOT -->|"INFO"| DROP
+  ROOT -->|"WARNING 이상"| LR2 --> OUT
+  GU --> OUT

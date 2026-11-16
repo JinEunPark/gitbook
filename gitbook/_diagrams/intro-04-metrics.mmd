@@ -1,0 +1,29 @@
+%% 질문: 숫자는 어디서 모여 어떻게 알림과 화면이 되는가
+flowchart LR
+  classDef internal fill:#FFFFFF,stroke:#475569,color:#0F172A
+  classDef planned fill:#FFFFFF,stroke:#94A3B8,stroke-dasharray:3 3,color:#64748B
+
+  subgraph BACK["rekit-backend_default"]
+    APP["rekle-app 메트릭<br/>워커 4개 값을 합산"]:::internal
+  end
+  subgraph SW["seaweedfs_default"]
+    S["seaweedfs 메트릭"]:::internal
+  end
+  subgraph MON["rekle-monitoring_default"]
+    EX["exporter 4종<br/>호스트 · 컨테이너 · DB · Redis"]:::internal
+    P["Prometheus<br/>15초 간격 · 30일 보관"]:::internal
+    RU["규칙<br/>알림 16 · 기록 8"]:::internal
+    AM["Alertmanager<br/>묶기 · 중복 억제"]:::internal
+    G["Grafana<br/>대시보드 3"]:::internal
+  end
+  SL["슬랙 (미연결)"]:::planned
+
+  P -.-> APP
+  P -.-> S
+  P -.-> EX
+  P --> RU --> AM --> SL
+  G -->|"조회만"| P
+
+  style BACK fill:#DCFCE7,stroke:#22C55E
+  style SW fill:#FEF3C7,stroke:#F59E0B
+  style MON fill:#EDE9FE,stroke:#8B5CF6

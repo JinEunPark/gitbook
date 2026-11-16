@@ -1,0 +1,18 @@
+%% 질문: 태그 하나가 운영에 올라가고 되돌아가는 길은 무엇인가
+flowchart TB
+  classDef ext fill:#F1F5F9,stroke:#64748B,stroke-dasharray:5 4,color:#0F172A
+  classDef internal fill:#FFFFFF,stroke:#475569,color:#0F172A
+
+  TAG["GitHub<br/>git 태그 X.Y.Z"]:::ext
+  BW["Jenkins build-was<br/>이미지 빌드"]:::internal
+  REG["내부 registry<br/>서버 안 이미지 보관"]:::internal
+  DW["Jenkins deploy-was<br/>운영자가 태그 선택"]:::internal
+  CP["그 태그 시점의<br/>compose 파일 꺼내기"]:::internal
+  UP["DB · Redis · 앱<br/>up -d"]:::internal
+  HC["앱 /health 확인<br/>2초 간격 최대 30회"]:::internal
+  RB["이전 태그로<br/>deploy-was 다시 실행"]:::internal
+
+  TAG --> BW --> REG --> DW
+  TAG --> CP
+  CP --> DW --> UP --> HC
+  HC -->|"실패"| RB

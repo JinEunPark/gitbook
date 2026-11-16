@@ -1,0 +1,19 @@
+%% 질문: 관측 스택을 앱과 다른 compose 프로젝트로 나누면 배포가 어떻게 갈라지는가
+flowchart LR
+  classDef internal fill:#FFFFFF,stroke:#475569,color:#0F172A
+
+  JD["Jenkins deploy-was<br/>태그마다 실행"]:::internal
+  MD["운영자 수동 배포<br/>설정이 바뀔 때만"]:::internal
+
+  subgraph APPP["compose 프로젝트 rekit-backend"]
+    A["rekle-app · postgres · redis"]:::internal
+  end
+  subgraph MONP["compose 프로젝트 rekle-monitoring"]
+    M["관측 컨테이너 7개"]:::internal
+  end
+  NET["외부 망 이름은 env 로 받음<br/>REKLE_APP_NETWORK · EDGE_NETWORK · SEAWEEDFS_NETWORK"]:::internal
+
+  JD --> APPP
+  MD --> MONP
+  MONP --> NET
+  NET -.->|"앱 망에 합류해 수집"| APPP
