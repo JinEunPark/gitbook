@@ -50,10 +50,10 @@ flowchart LR
     l5["운영자"]:::ext ==>|"운영자 접근"| l6["운영 도구"]:::internal
   end
 
-  style E fill:#DBEAFE,stroke:#3B82F6
-  style B fill:#DCFCE7,stroke:#22C55E
-  style S fill:#FEF3C7,stroke:#F59E0B
-  style M fill:#EDE9FE,stroke:#8B5CF6
+  style E fill:#DBEAFE,stroke:#3B82F6,color:#1E3A8A
+  style B fill:#DCFCE7,stroke:#22C55E,color:#14532D
+  style S fill:#FEF3C7,stroke:#F59E0B,color:#713F12
+  style M fill:#EDE9FE,stroke:#8B5CF6,color:#4C1D95
 ```
 
 _색 영역은 Docker 망, 상자 색은 공개 수준, 선 모양은 흐르는 것의 종류다. 한 컨테이너가 여러 망에 붙어 있으면 대표 망 하나에 그리고 상자 안에 나머지 망 이름을 적는다._

@@ -37,9 +37,9 @@ flowchart LR
   N ==>|"운영 도구"| G
   N ==>|"운영 도구"| J
 
-  style EDGE fill:#DBEAFE,stroke:#3B82F6
-  style BACK fill:#DCFCE7,stroke:#22C55E
-  style SW fill:#FEF3C7,stroke:#F59E0B
+  style EDGE fill:#DBEAFE,stroke:#3B82F6,color:#1E3A8A
+  style BACK fill:#DCFCE7,stroke:#22C55E,color:#14532D
+  style SW fill:#FEF3C7,stroke:#F59E0B,color:#713F12
 ```
 
 _DB 와 Redis 는 `rekit-backend_default` 에만 두어, 바깥은 물론 nginx 도 직접 닿지 못하게 했다. `rekle-app` 은 세 망에 걸쳐 있어 nginx 와 DB 사이의 유일한 통로가 된다. 관측 컨테이너 7개는 [모니터링](monitoring.md) 그림에 따로 그렸다._

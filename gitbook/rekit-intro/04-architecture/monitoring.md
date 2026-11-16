@@ -36,9 +36,9 @@ flowchart LR
   P --> RU --> AM --> SL
   G -->|"조회만"| P
 
-  style BACK fill:#DCFCE7,stroke:#22C55E
-  style SW fill:#FEF3C7,stroke:#F59E0B
-  style MON fill:#EDE9FE,stroke:#8B5CF6
+  style BACK fill:#DCFCE7,stroke:#22C55E,color:#14532D
+  style SW fill:#FEF3C7,stroke:#F59E0B,color:#713F12
+  style MON fill:#EDE9FE,stroke:#8B5CF6,color:#4C1D95
 ```
 
 _관측 스택을 앱과 다른 compose 프로젝트로 두고 앱 망에 "합류"하게 한 이유는, 앱을 배포할 때마다 관측 컨테이너가 다시 만들어지지 않게 하기 위해서다. Grafana 는 Prometheus 만 조회하므로 DB 비밀번호를 갖지 않는다._
