@@ -1,6 +1,7 @@
 # Table of contents
 
 * [Intro](README.md)
+* [REKIT 소개 · 철거 가전을 다시 연결하는 방식](about-rekit.md)
 * [rekit 쇼핑몰 시스템 아키텍처 소개](rekit-intro/README.md)
   * [문제와 배경](rekit-intro/01-background.md)
   * [요구사항과 제약](rekit-intro/02-constraints.md)
@@ -17,12 +18,7 @@
   * [변경 이력](rekit-intro/07-history.md)
   * [운영 현황](rekit-intro/08-operations.md)
   * [회고와 남은 과제](rekit-intro/09-retrospective.md)
-* [Page 1](page-1.md)
-* [문제 해결 사례](cases/README.md)
-  * [상품 이미지 로딩 18.2초 → 1.8초](cases/case-01-image.md)
-  * [검색봇에 에러 문구만 보여주던 프리렌더 HTML](cases/case-02-prerender.md)
 * [rekit 작업일지](rekit-1/README.md)
-  * [REKIT 소개 · 철거 가전을 다시 연결하는 방식](rekit-1/about-rekit.md)
   * [용어 풀이](rekit-1/glossary.md)
   * [2026년 5월](rekit-1/2026-05/README.md)
     * [05.01 · 프로젝트 시작 — 디자인 시안 14화면과 서버 뼈대](rekit-1/2026-05/2026-05-01.md)
@@ -78,3 +74,6 @@
     * [11.13 · 이미지 최적화 성과 정리](rekit-1/2026-11/2026-11-13-img.md)
     * [11.15 · 프리렌더에 굳은 API 에러 고치기](rekit-1/2026-11/2026-11-15.md)
     * [11.16 · 작업 기록 정리, 남은 문제 16개](rekit-1/2026-11/2026-11-16.md)
+* [문제 해결 사례](cases/README.md)
+  * [상품 이미지 로딩 18.2초 → 1.8초](cases/case-01-image.md)
+  * [검색봇에 에러 문구만 보여주던 프리렌더 HTML](cases/case-02-prerender.md)
