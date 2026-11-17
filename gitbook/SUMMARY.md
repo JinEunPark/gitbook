@@ -2,23 +2,21 @@
 
 * [Intro](README.md)
 
-## rekit 소개 문서
-
-* [문제와 배경](rekit/01-background.md)
-* [요구사항과 제약](rekit/02-constraints.md)
-* [핵심 설계 원칙](rekit/03-principles.md)
-* [시스템 구성](rekit/04-architecture/README.md)
-  * [전체 구성](rekit/04-architecture/overview.md)
-  * [컨테이너와 네트워크](rekit/04-architecture/containers.md)
-  * [요청 흐름](rekit/04-architecture/request-flow.md)
-  * [앱 구조와 결제](rekit/04-architecture/app.md)
-  * [모니터링](rekit/04-architecture/monitoring.md)
-* [주요 설계 결정](rekit/05-decisions.md)
-* [기술 선택 이유](rekit/06-tech-choices.md)
-* [변경 이력](rekit/07-history.md)
-* [운영 현황](rekit/08-operations.md)
-* [회고와 남은 과제](rekit/09-retrospective.md)
-* [개요](rekit/rekit-intro.md)
+* [rekit 소개 문서](rekit/rekit-intro.md)
+  * [문제와 배경](rekit/01-background.md)
+  * [요구사항과 제약](rekit/02-constraints.md)
+  * [핵심 설계 원칙](rekit/03-principles.md)
+  * [시스템 구성](rekit/04-architecture/README.md)
+    * [전체 구성](rekit/04-architecture/overview.md)
+    * [컨테이너와 네트워크](rekit/04-architecture/containers.md)
+    * [요청 흐름](rekit/04-architecture/request-flow.md)
+    * [앱 구조와 결제](rekit/04-architecture/app.md)
+    * [모니터링](rekit/04-architecture/monitoring.md)
+  * [주요 설계 결정](rekit/05-decisions.md)
+  * [기술 선택 이유](rekit/06-tech-choices.md)
+  * [변경 이력](rekit/07-history.md)
+  * [운영 현황](rekit/08-operations.md)
+  * [회고와 남은 과제](rekit/09-retrospective.md)
 * [Page 1](rekit/page-1.md)
 
 ***
