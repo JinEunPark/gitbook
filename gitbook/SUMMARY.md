@@ -1,8 +1,7 @@
 # Table of contents
 
 * [Intro](README.md)
-
-* [rekit 소개 문서](rekit/rekit-intro.md)
+* [rekit 쇼핑몰 시스템 아키텍처 소개](rekit/rekit-intro.md)
   * [문제와 배경](rekit/01-background.md)
   * [요구사항과 제약](rekit/02-constraints.md)
   * [핵심 설계 원칙](rekit/03-principles.md)
@@ -19,9 +18,6 @@
   * [운영 현황](rekit/08-operations.md)
   * [회고와 남은 과제](rekit/09-retrospective.md)
 * [Page 1](rekit/page-1.md)
-
-***
-
 * [문제 해결 사례](cases/README.md)
   * [상품 이미지 로딩 18.2초 → 1.8초](cases/case-01-image.md)
   * [검색봇에 에러 문구만 보여주던 프리렌더 HTML](cases/case-02-prerender.md)
