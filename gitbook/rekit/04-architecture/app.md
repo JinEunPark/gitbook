@@ -96,6 +96,8 @@ _결제는 세 곳(브라우저 · 토스 · 웹훅)에서 신호가 오므로, 
 
 ## 배포
 
+검사 · 빌드 · 배포 3단계의 전체 구조, 사용하는 이미지, 이미지가 옮겨지고 저장되는 경로, 롤백 과정은 [빌드와 배포 (CI/CD)](build-deploy.md)에 따로 정리했다. 여기서는 백엔드 배포 잡의 순서만 본다.
+
 ```mermaid
 flowchart TB
   classDef ext fill:#F1F5F9,stroke:#64748B,stroke-dasharray:5 4,color:#0F172A

@@ -11,6 +11,7 @@
     * [컨테이너와 네트워크](rekit/04-architecture/containers.md)
     * [요청 흐름](rekit/04-architecture/request-flow.md)
     * [앱 구조와 결제](rekit/04-architecture/app.md)
+    * [빌드와 배포 (CI/CD)](rekit/04-architecture/build-deploy.md)
     * [모니터링](rekit/04-architecture/monitoring.md)
   * [주요 설계 결정](rekit/05-decisions.md)
   * [기술 선택 이유](rekit/06-tech-choices.md)
