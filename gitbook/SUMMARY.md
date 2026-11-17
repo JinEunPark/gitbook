@@ -22,6 +22,7 @@
   * [상품 이미지 로딩 18.2초 → 1.8초](cases/case-01-image.md)
   * [검색봇에 에러 문구만 보여주던 프리렌더 HTML](cases/case-02-prerender.md)
 * [rekit 작업일지](rekit-1/README.md)
+  * [REKIT 소개 · 철거 가전을 다시 연결하는 방식](rekit-1/about-rekit.md)
   * [용어 풀이](rekit-1/glossary.md)
   * [2026년 5월](rekit-1/2026-05/README.md)
     * [05.01 · 프로젝트 시작 — 디자인 시안 14화면과 서버 뼈대](rekit-1/2026-05/2026-05-01.md)
